@@ -1,18 +1,20 @@
+#!/usr/bin/python3
+
 import argparse
 import requests
 
 from gitlab import *
 
 
-def download_artifact(url,token, project_id, build_id):
+def download_artifact(url, token, project_id, build_id, filename="artifacts.zip"):
     '''
 
+    :type filename: str
     :type project_id: int or str
     :type build_id: int or str
     :return: downloaded file name
     '''
     token_params = {"PRIVATE-TOKEN": token}
-    filename = "artifacts.zip"
 
     url = "{url}/api/v3/projects/{project_id}/builds/{build_id}/artifacts".format(build_id=build_id, project_id=project_id, url=url)
     responce = requests.get(url, headers=token_params, stream=True)
