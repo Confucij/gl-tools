@@ -5,7 +5,6 @@ import requests
 
 from gitlab import *
 
-
 def download_artifact(url, token, project_id, build_id, filename="artifacts.zip"):
     '''
 
@@ -24,6 +23,20 @@ def download_artifact(url, token, project_id, build_id, filename="artifacts.zip"
                 f.write(chunk)
     return filename
 
+def retry_build(url, token, project_id, build_id):
+    '''
+
+    :type filename: str
+    :type project_id: int or str
+    :type build_id: int or str
+    :return: downloaded file name
+    '''
+    token_params = {"PRIVATE-TOKEN": token}
+
+    url = "{url}/api/v3/projects/{project_id}/builds/{build_id}/retry".format(build_id=build_id, project_id=project_id, url=url)
+    responce = requests.post(url, headers=token_params, stream=True)
+    print(responce)
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Download artifacts from gitlab repository')
@@ -31,6 +44,8 @@ if __name__ == '__main__':
     parser.add_argument('--token', nargs=1, help="token to access GitLab's api")
     parser.add_argument("--project", nargs=1, type=str)
     parser.add_argument("--branch", nargs=1, type=str)
+    parser.add_argument("get", nargs="?", type=str)
+    parser.add_argument("rebuild", nargs="?", type=str)
 
 
     args = parser.parse_args()
@@ -38,6 +53,12 @@ if __name__ == '__main__':
     token = args.token[0]
     url = args.url[0]
     project_id = args.project[0]
+    rebuild = False
+    try:
+        args.rebuild
+        rebuild = True
+    except TypeError:
+        pass
 
     gl = Gitlab(url, token)
 
@@ -50,10 +71,14 @@ if __name__ == '__main__':
             commit = commit_manager.get(commit_sha, project_id=project_id) # type: ProjectCommit
             for build in commit.builds(): # type: ProjectBuild
                 build_dict = build.as_dict()
-                if build_dict["status"] == "success" and "artifacts_file" in build_dict:
-                    filename = download_artifact(url, token, project_id, build.as_dict()["id"])
-                    print(filename)
+                if rebuild:
+                    retry_build(url, token, project_id, build.as_dict()["id"])
                     exit(0)
+                else:
+                    if build_dict["status"] == "success" and "artifacts_file" in build_dict:
+                        filename = download_artifact(url, token, project_id, build.as_dict()["id"])
+                        print(filename)
+                        exit(0)
     exit(-1)
 
 
