@@ -44,8 +44,7 @@ if __name__ == '__main__':
     parser.add_argument('--token', nargs=1, help="token to access GitLab's api")
     parser.add_argument("--project", nargs=1, type=str)
     parser.add_argument("--branch", nargs=1, type=str)
-    parser.add_argument("get", nargs="?", type=str)
-    parser.add_argument("rebuild", nargs="?", type=str)
+    parser.add_argument("--op", nargs=1, type=str)
 
 
     args = parser.parse_args()
@@ -56,11 +55,8 @@ if __name__ == '__main__':
     project_id = project_id.replace("/", "%2F")
 
     rebuild = False
-    try:
-        args.rebuild
+    if args.op[0] == "rebuild":
         rebuild = True
-    except TypeError:
-        pass
 
     gl = Gitlab(url, token)
 
