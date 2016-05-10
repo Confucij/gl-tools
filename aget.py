@@ -52,7 +52,9 @@ if __name__ == '__main__':
     branch_name = args.branch[0]
     token = args.token[0]
     url = args.url[0]
-    project_id = args.project[0]
+    project_id = args.project[0] # type: str
+    project_id = project_id.replace("/", "%2F")
+
     rebuild = False
     try:
         args.rebuild
