@@ -61,7 +61,7 @@ if __name__ == '__main__':
     gl = Gitlab(url, token)
 
 
-    branches = gl.project_branches.list(project_id=project_id)
+    branches = gl.project_branches.list(project_id=project_id, id=branch_name)
     for branch in branches: # type: ProjectBranch
         if branch_name == branch.as_dict()["name"]:
             commit_sha = branch.as_dict()['commit']["id"]
